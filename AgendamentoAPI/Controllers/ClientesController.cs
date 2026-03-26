@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using AgendamentoAPI.Data;
+﻿using AgendamentoAPI.Data;
+using AgendamentoAPI.DTOs;
 using AgendamentoAPI.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AgendamentoAPI.Controllers
@@ -17,20 +18,49 @@ namespace AgendamentoAPI.Controllers
         }
 
         // GET: api/clientes
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cliente>>> GetClientes()
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ClienteResponseDTO>> GetById(int id)
         {
-            return await _context.Clientes.ToListAsync();
+            var cliente = await _context.Clientes.FindAsync(id);
+
+            if (cliente == null)
+                return NotFound();
+
+            var clienteDto = new ClienteResponseDTO
+            {
+                Id = cliente.Id,
+                Nome = cliente.Nome,
+                Email = cliente.Email
+            };
+
+            return Ok(clienteDto);
         }
 
         // POST: api/clientes
         [HttpPost]
-        public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
+        public async Task<IActionResult> Post([FromBody] ClienteDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var cliente = new Cliente
+            {
+                Nome = dto.Nome,
+                Email = dto.Email,
+                Telefone = dto.Telefone
+            };
+
             _context.Clientes.Add(cliente);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetClientes), new { id = cliente.Id }, cliente);
+            var clienteResponse = new ClienteResponseDTO
+            {
+                Id = cliente.Id,
+                Nome = cliente.Nome,
+                Email = cliente.Email
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = cliente.Id }, clienteResponse);
         }
     }
 }
