@@ -1,6 +1,7 @@
 ﻿using AgendamentoAPI.Data;
 using AgendamentoAPI.DTOs;
 using AgendamentoAPI.Models;
+using AgendamentoAPI.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,28 +12,25 @@ namespace AgendamentoAPI.Controllers
     [Route("api/[controller]")]
     public class ClientesController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IClienteService _service;
 
-        public ClientesController(AppDbContext context, IMapper mapper)
+
+        public ClientesController(IClienteService service)
         {
-            _context = context;
-            _mapper = mapper;
+            _service = service;
         }
 
         // GET: api/clientes
         [HttpGet("{id}")]
-        public async Task<ActionResult<ClienteResponseDTO>> GetById(int id)
-        {
-            var cliente = await _context.Clientes.FindAsync(id);
+public async Task<IActionResult> GetById(int id)
+{
+    var cliente = await _service.GetById(id);
 
-            if (cliente == null)
-                return NotFound();
+    if (cliente == null)
+        return NotFound();
 
-            var clienteDto = _mapper.Map<ClienteResponseDTO>(cliente);
-
-            return Ok(clienteDto);
-        }
+    return Ok(cliente);
+}
 
         // POST: api/clientes
         [HttpPost]
@@ -41,14 +39,9 @@ namespace AgendamentoAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var cliente = _mapper.Map<Cliente>(dto);
+            var cliente = await _service.Create(dto);
 
-            _context.Clientes.Add(cliente);
-            await _context.SaveChangesAsync();
-
-            var clienteResponse = _mapper.Map<ClienteResponseDTO>(cliente);
-
-            return CreatedAtAction(nameof(GetById), new { id = cliente.Id }, clienteResponse);
+            return CreatedAtAction(nameof(GetById), new { id = cliente.Id }, cliente);
         }
     }
 }
