@@ -1,6 +1,7 @@
 ﻿using AgendamentoAPI.Data;
 using AgendamentoAPI.DTOs;
 using AgendamentoAPI.Models;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,12 @@ namespace AgendamentoAPI.Controllers
     public class ClientesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public ClientesController(AppDbContext context)
+        public ClientesController(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/clientes
@@ -26,12 +29,7 @@ namespace AgendamentoAPI.Controllers
             if (cliente == null)
                 return NotFound();
 
-            var clienteDto = new ClienteResponseDTO
-            {
-                Id = cliente.Id,
-                Nome = cliente.Nome,
-                Email = cliente.Email
-            };
+            var clienteDto = _mapper.Map<ClienteResponseDTO>(cliente);
 
             return Ok(clienteDto);
         }
@@ -43,22 +41,12 @@ namespace AgendamentoAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var cliente = new Cliente
-            {
-                Nome = dto.Nome,
-                Email = dto.Email,
-                Telefone = dto.Telefone
-            };
+            var cliente = _mapper.Map<Cliente>(dto);
 
             _context.Clientes.Add(cliente);
             await _context.SaveChangesAsync();
 
-            var clienteResponse = new ClienteResponseDTO
-            {
-                Id = cliente.Id,
-                Nome = cliente.Nome,
-                Email = cliente.Email
-            };
+            var clienteResponse = _mapper.Map<ClienteResponseDTO>(cliente);
 
             return CreatedAtAction(nameof(GetById), new { id = cliente.Id }, clienteResponse);
         }
