@@ -14,7 +14,6 @@ namespace AgendamentoAPI.Controllers
     {
         private readonly IClienteService _service;
 
-
         public ClientesController(IClienteService service)
         {
             _service = service;

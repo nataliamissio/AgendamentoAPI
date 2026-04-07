@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using AgendamentoAPI.DTOs;
+using AgendamentoAPI.Models;
+using AutoMapper;
 
 namespace AgendamentoAPI.Mappings
 {
@@ -7,8 +9,11 @@ namespace AgendamentoAPI.Mappings
         public MappingProfile()
         {
             // Configurações de mapeamento
-            CreateMap<Models.Cliente, DTOs.ClienteResponseDTO>();
-            CreateMap<DTOs.ClienteDTO, Models.Cliente>();
+            CreateMap<Cliente, ClienteResponseDTO>();
+            CreateMap<ClienteDTO, Cliente>();
+
+            CreateMap<Agendamento, AgendamentoResponseDTO>();
+            CreateMap<AgendamentoDTO, Agendamento>();
         }
     }
 }

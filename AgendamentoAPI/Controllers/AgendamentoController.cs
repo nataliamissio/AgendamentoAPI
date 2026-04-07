@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using AgendamentoAPI.Data;
 using AgendamentoAPI.Models;
 using AgendamentoAPI.DTOs;
+using AutoMapper;
+using AgendamentoAPI.Services;
 
 namespace AgendamentoAPI.Controllers
 {
@@ -10,11 +12,11 @@ namespace AgendamentoAPI.Controllers
     [Route("api/[controller]")]
     public class AgendamentosController : ControllerBase
     {
-        private readonly AppDbContext _context;
+       private readonly IAgendamentoService _service;
 
-        public AgendamentosController(AppDbContext context)
+        public AgendamentosController(IAgendamentoService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpPost]
@@ -23,25 +25,32 @@ namespace AgendamentoAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var agendamento = new Agendamento
-            {
-                ClienteId = dto.ClienteId,
-                DataHora = dto.DataHora,
-                Servico = dto.Observacoes
-            };
+            var agendamento = await _service.Create(dto);
 
-            _context.Agendamentos.Add(agendamento);
-            await _context.SaveChangesAsync();
+            if (agendamento == null)
+                return BadRequest("Cliente não encontrado");
 
-            var response = new AgendamentoResponseDTO
-            {
-                Id = agendamento.Id,
-                ClienteId = agendamento.ClienteId,
-                DataHora = agendamento.DataHora,
-                Observacoes = agendamento.Servico
-            };
-
-            return Ok(response);
+            return Ok(agendamento);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var agendamento = await _service.GetById(id);
+
+            if (agendamento == null)
+                return NotFound();
+
+            return Ok(agendamento);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var agendamentos = await _service.GetAll();
+
+            return Ok(agendamentos);
+        }
+
     }
 }
