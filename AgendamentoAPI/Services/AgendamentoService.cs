@@ -48,4 +48,40 @@ public class AgendamentoService : IAgendamentoService
 
         return _mapper.Map<AgendamentoResponseDTO>(agendamento);
     }
+
+    public async Task<AgendamentoResponseDTO> Update(int id, AgendamentoDTO dto)
+    {
+        var agendamento = await _context.Agendamentos.FindAsync(id);
+
+        if (agendamento == null)
+            return null;
+
+        var clienteExiste = await _context.Clientes
+            .AnyAsync(c => c.Id == dto.ClienteId);
+
+        if (!clienteExiste)
+            return null;
+
+        // Atualiza os dados
+        agendamento.ClienteId = dto.ClienteId;
+        agendamento.DataHora = dto.DataHora;
+        agendamento.Servico = dto.Servico;
+
+        await _context.SaveChangesAsync();
+
+        return _mapper.Map<AgendamentoResponseDTO>(agendamento);
+    }
+
+    public async Task<bool> Delete(int id)
+    {
+        var agendamento = await _context.Agendamentos.FindAsync(id);
+
+        if (agendamento == null)
+            return false;
+
+        _context.Agendamentos.Remove(agendamento);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
 }

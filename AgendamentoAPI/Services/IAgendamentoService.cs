@@ -7,5 +7,7 @@ namespace AgendamentoAPI.Services
         Task<List<AgendamentoResponseDTO>> GetAll();
         Task<AgendamentoResponseDTO> GetById(int id);
         Task<AgendamentoResponseDTO> Create(AgendamentoDTO dto);
+        Task<AgendamentoResponseDTO> Update(int id, AgendamentoDTO dto);
+        Task<bool> Delete(int id);
     }
 }

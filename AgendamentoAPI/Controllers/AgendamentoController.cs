@@ -52,5 +52,29 @@ namespace AgendamentoAPI.Controllers
             return Ok(agendamentos);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, [FromBody] AgendamentoDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var agendamento = await _service.Update(id, dto);
+
+            if (agendamento == null)
+                return NotFound();
+
+            return Ok(agendamento);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var removido = await _service.Delete(id);
+
+            if (!removido)
+                return NotFound();
+
+            return NoContent();
+        }
     }
 }
